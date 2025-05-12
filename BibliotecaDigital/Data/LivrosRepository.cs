@@ -40,6 +40,12 @@ public class LivrosRepository : ILivrosRepository
 
     public List<Livros> ListarDisponiveis()
     {
-        return _context.Livros.Where(l => !l.Emprestado).ToList();
+        return _context.Livros.Where(l => !l.emprestado).ToList();
+    }
+
+    public void Atualizar(Livros livro)
+    {
+        _context.Livros.Update(livro);
+        _context.SaveChanges();
     }
 }

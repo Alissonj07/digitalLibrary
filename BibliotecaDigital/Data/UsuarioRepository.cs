@@ -37,4 +37,16 @@ public class UsuarioRepository : IUsuarioRepository
         _context.Usuarios.Remove(usuario);
         _context.SaveChanges();
     }
+    public Usuario? BuscarUsuarioPorEmailSenha(string email, string senha)
+    {
+        Usuario? usuarioExistente = 
+            _context.Usuarios.FirstOrDefault
+            (x => x.Email == email && x.Senha == senha);
+        return usuarioExistente;
+    }
+public void Atualizar(Usuario usuario)
+{
+    _context.Usuarios.Update(usuario);
+    _context.SaveChanges();
+}
 }

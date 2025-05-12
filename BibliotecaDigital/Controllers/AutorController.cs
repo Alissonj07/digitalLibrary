@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaDigital.Models;
@@ -11,14 +12,14 @@ namespace BibliotecaDigital.Controllers
     {
         private readonly IAutorRepository _autorRepository;
         private readonly ILivrosRepository _livrosRepository;
-    public AutorController(IAutorRepository autorRepository, ILivrosRepository livrosRepository,)
+    public AutorController(IAutorRepository autorRepository, ILivrosRepository livrosRepository)
     {
         _autorRepository = autorRepository;
         _livrosRepository = livrosRepository;
     }
 
     [HttpPost("cadastrar")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public IActionResult Cadastrar([FromBody] Autor autor)
     {
          var AutorExistente = _autorRepository.BuscarPorNome(autor.Nome);
@@ -46,7 +47,7 @@ namespace BibliotecaDigital.Controllers
     }
 
     [HttpDelete("deletar/{id}")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public IActionResult Deletar(int id)
     {
         var autor = _autorRepository.BuscarPorId(id);

@@ -12,7 +12,7 @@ public class EmprestimoRepository : IEmprestimoRepository
         _context = context;
     }
 
-    public void Registrar(Emprestimo emprestimo)
+    public void Cadastrar(Emprestimo emprestimo)
     {
         _context.Emprestimos.Add(emprestimo);
         _context.SaveChanges();
@@ -25,7 +25,7 @@ public class EmprestimoRepository : IEmprestimoRepository
 
     public List<Emprestimo> ListarPorUsuario(int usuarioId)
     {
-        return _context.Emprestimos.Where(e => e.UsuarioId == usuarioId).ToList();
+        return _context.Emprestimos.Where(e => e.usuarioId == usuarioId).ToList();
     }
 
     public Emprestimo BuscarPorId(int id)
@@ -35,13 +35,18 @@ public class EmprestimoRepository : IEmprestimoRepository
 
     public Emprestimo BuscarPorLivroId(int livroId)
     {
-        return _context.Emprestimos.FirstOrDefault(e => e.LivroId == livroId && e.DataDevolucao == null);
+        return _context.Emprestimos.FirstOrDefault(e => e.livroId == livroId && e.dataDeExpircao == null);
     }
 
     public void Finalizar(Emprestimo emprestimo)
     {
-        emprestimo.DataDevolucao = DateTime.Now;
+        emprestimo.dataDeExpircao = DateTime.Now;
         _context.Emprestimos.Update(emprestimo);
         _context.SaveChanges();
     }
+    public void Atualizar(Emprestimo emprestimo)
+{
+    _context.Emprestimos.Update(emprestimo);
+    _context.SaveChanges();
+}
 }

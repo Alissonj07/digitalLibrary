@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaDigital.Models;
@@ -5,16 +6,20 @@ using BibliotecaDigital.Data;
 
 namespace BibliotecaDigital.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class LivrosController : ControllerBase
     {
-    {
+    
         private readonly ILivrosRepository _livrosRepository;
         private readonly IAutorRepository _autorRepository;
+        private readonly IEmprestimoRepository _emprestimoRepository;
 
-        public LivrosController(ILivrosRepository livrosRepository)
+        public LivrosController(ILivrosRepository livrosRepository, IAutorRepository autorRepository, IEmprestimoRepository emprestimoRepository)
         {
+            _autorRepository = autorRepository;
+            _emprestimoRepository = emprestimoRepository;
             _livrosRepository = livrosRepository;
         }
 
@@ -26,7 +31,6 @@ namespace BibliotecaDigital.Controllers
         }
 
         [HttpGet("listar/{id}")]
-        [Authorize]
         public IActionResult ListarPorId(int id)
         {
             var livro = _livrosRepository.BuscarPorId(id);
@@ -37,7 +41,7 @@ namespace BibliotecaDigital.Controllers
         }
         
         [HttpPost("cadastrar")]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public IActionResult Cadastrar([FromBody] Livros livro, int AutorId)
         {
             var autorExistente = _autorRepository.BuscarPorId(AutorId);
@@ -54,14 +58,14 @@ namespace BibliotecaDigital.Controllers
 
         
         [HttpDelete("deletar/{id}")]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public IActionResult Deletar(int id)
         {
             var livro = _livrosRepository.BuscarPorId(id);
             if (livro == null)
                 return NotFound("Livro não encontrado.");
 
-            var emprestimo = _emprestimoRepository.BuscarPorLivorId(id);
+            var emprestimo = _emprestimoRepository.BuscarPorLivroId(id);
             if (emprestimo != null)
                 return BadRequest("Não é possível excluir o livro, pois ele está associado a um empréstimo.");
 
@@ -73,6 +77,5 @@ namespace BibliotecaDigital.Controllers
         {
              return Ok(_livrosRepository.Listar());
         }
-    }
     }
 }
