@@ -9,4 +9,6 @@ public class Usuario
     public string Senha { get; set; } = string.Empty;
     public Permissao Permissao { get; set; } = Permissao.administrador;
     public DateTime CriadoEm { get; set; } = DateTime.Now;
+
+    public float Multa { get; set; } = 0;
 }
