@@ -4,6 +4,10 @@ namespace BibliotecaDigital.Models;
 
 public class Emprestimo
 {
+    public Emprestimo(Livros livro,  Usuario usuario){
+        usuarioId = usuario.Id;
+        livroId = livro.Id;
+    }
     public int Id { get; set; }
     public int livroId { get; set; }
     public required Livros livro { get; set; }
