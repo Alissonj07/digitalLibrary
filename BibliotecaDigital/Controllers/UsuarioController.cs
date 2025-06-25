@@ -29,23 +29,39 @@ namespace BibliotecaDigital.Controllers
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar([FromBody] Usuario usuario)
     {
-        var usuarioExistente = _usuarioRepository.BuscarPorEmail(usuario.Email);
-        if (usuarioExistente != null)
-            return BadRequest("Usuário já cadastrado.");
+        try
+        {
+            if (usuario == null)
+                return BadRequest("Dados do usuário não fornecidos.");
+                
+            if (string.IsNullOrEmpty(usuario.Email))
+                return BadRequest("Email é obrigatório.");
+                
+            if (string.IsNullOrEmpty(usuario.Senha))
+                return BadRequest("Senha é obrigatória.");
 
-        _usuarioRepository.Cadastrar(usuario);
-        return Created("", usuario);
+            var usuarioExistente = _usuarioRepository.BuscarPorEmail(usuario.Email);
+            if (usuarioExistente != null)
+                return BadRequest("Usuário já cadastrado.");
+
+            _usuarioRepository.Cadastrar(usuario);
+            return Created("", usuario);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Erro ao cadastrar usuário: {ex.Message}");
+        }
     }
 
     [HttpGet("listar")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "administrador")]
     public IActionResult Listar()
     {        
         return Ok(_usuarioRepository.Listar());
     }
 
     [HttpGet("listar/{id}")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "administrador")]
     public IActionResult ListarPorId(int id)
     {
         var usuario = _usuarioRepository.BuscarPorId(id);
@@ -67,8 +83,9 @@ namespace BibliotecaDigital.Controllers
 
         string token = GerarToken(usuarioExistente);
         return Ok(token);
-        }
-     public string GerarToken(Usuario usuario)
+    }
+    
+    private string GerarToken(Usuario usuario)
     {
         var claims = new[]
         {

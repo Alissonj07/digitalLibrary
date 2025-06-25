@@ -18,7 +18,8 @@ namespace BibliotecaDigital.Controllers
         _emprestimoRepository = emprestimoRepository;
         _autorRepository = autorRepository;
         _usuarioRepository = usuarioRepository;
-     }
+        _livrosRepository = livrosRepository;
+    }
 
     [HttpPost("cadastrar/{livroId}")]
     [Authorize]
@@ -35,7 +36,7 @@ namespace BibliotecaDigital.Controllers
         if (livroExistente == null)
             return NotFound("Livro não encontrado.");
 
-        if (livroExistente.emprestado == true)
+        if (livroExistente.Emprestado == true)
             return BadRequest("Livro já emprestado.");
 
         var emprestimo = new Emprestimo(livroExistente, usuarioExistente)
@@ -45,14 +46,44 @@ namespace BibliotecaDigital.Controllers
             dataDeExpircao = DateTime.Now.AddDays(7) 
         };
 
-        livroExistente.emprestado = true;
+        livroExistente.Emprestado = true;
+        _livrosRepository.Atualizar(livroExistente);
+        _emprestimoRepository.Cadastrar(emprestimo);
+        return Created("", emprestimo);
+    }
+
+    [HttpPost("emprestar")]
+    [Authorize]
+    public IActionResult Emprestar([FromBody] EmprestimoRequest request)
+    {
+        var usuarioExistente = _usuarioRepository.BuscarPorId(request.usuarioId);
+        if (usuarioExistente == null)
+            return NotFound("Usuário não encontrado.");
+        if (usuarioExistente.Multa > 0)
+            return BadRequest("Usuário com multa pendente.");
+
+        var livroExistente = _livrosRepository.BuscarPorId(request.livroId);
+        if (livroExistente == null)
+            return NotFound("Livro não encontrado.");
+
+        if (livroExistente.Emprestado == true)
+            return BadRequest("Livro já emprestado.");
+
+        var emprestimo = new Emprestimo(livroExistente, usuarioExistente)
+        {
+            livro = livroExistente, 
+            usuario = usuarioExistente, 
+            dataDeExpircao = DateTime.Now.AddDays(7) 
+        };
+
+        livroExistente.Emprestado = true;
         _livrosRepository.Atualizar(livroExistente);
         _emprestimoRepository.Cadastrar(emprestimo);
         return Created("", emprestimo);
     }
 
     [HttpGet("listar")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "administrador")]
     public IActionResult Listar()
     {        
         return Ok(_emprestimoRepository.Listar());
@@ -62,7 +93,8 @@ namespace BibliotecaDigital.Controllers
     [HttpPut("devolucao/{id}")]
     [Authorize]
     public IActionResult Devolucao(int id)
-    {   string mesage = "";
+    {   
+        string mesage = "";
 
         var emprestimo = _emprestimoRepository.BuscarPorId(id);
         if (emprestimo == null)
@@ -85,8 +117,11 @@ namespace BibliotecaDigital.Controllers
         _emprestimoRepository.Atualizar(emprestimo);
 
         var livro = _livrosRepository.BuscarPorId(emprestimo.livroId);
-        livro.emprestado = false;
-        _livrosRepository.Atualizar(livro);
+        if (livro != null)
+        {
+            livro.Emprestado = false;
+            _livrosRepository.Atualizar(livro);
+        }
 
         return Ok("Devolução registrada com sucesso." + mesage);
     }

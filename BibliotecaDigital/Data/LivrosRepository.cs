@@ -1,4 +1,5 @@
 using BibliotecaDigital.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BibliotecaDigital.Data;
 
@@ -13,17 +14,24 @@ public class LivrosRepository : ILivrosRepository
 
     public List<Livros> Listar()
     {
-        return _context.Livros.ToList();
+        return _context.Livros
+            .Include(l => l.Autor)
+            .ToList();
     }
 
     public List<Livros> ListarPorAutor(int autorId)
     {
-        return _context.Livros.Where(l => l.AutorId == autorId).ToList();
+        return _context.Livros
+            .Include(l => l.Autor)
+            .Where(l => l.AutorId == autorId)
+            .ToList();
     }
 
-    public Livros BuscarPorId(int id)
+    public Livros? BuscarPorId(int id)
     {
-        return _context.Livros.FirstOrDefault(l => l.Id == id);
+        return _context.Livros
+            .Include(l => l.Autor)
+            .FirstOrDefault(l => l.Id == id);
     }
 
     public void Cadastrar(Livros livro)
@@ -40,7 +48,7 @@ public class LivrosRepository : ILivrosRepository
 
     public List<Livros> ListarDisponiveis()
     {
-        return _context.Livros.Where(l => !l.emprestado).ToList();
+        return _context.Livros.Where(l => !l.Emprestado).ToList();
     }
 
     public void Atualizar(Livros livro)

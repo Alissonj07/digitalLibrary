@@ -19,7 +19,7 @@ namespace BibliotecaDigital.Controllers
     }
 
     [HttpPost("cadastrar")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "administrador")]
     public IActionResult Cadastrar([FromBody] Autor autor)
     {
          var AutorExistente = _autorRepository.BuscarPorNome(autor.Nome);
@@ -47,7 +47,7 @@ namespace BibliotecaDigital.Controllers
     }
 
     [HttpDelete("deletar/{id}")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "administrador")]
     public IActionResult Deletar(int id)
     {
         var autor = _autorRepository.BuscarPorId(id);

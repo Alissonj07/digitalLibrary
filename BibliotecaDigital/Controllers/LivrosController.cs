@@ -41,24 +41,39 @@ namespace BibliotecaDigital.Controllers
         }
         
         [HttpPost("cadastrar")]
-        [Authorize(Roles = "admin")]
-        public IActionResult Cadastrar([FromBody] Livros livro, int AutorId)
+        [Authorize(Roles = "administrador")]
+        public IActionResult Cadastrar([FromBody] Livros livro)
         {
-            var autorExistente = _autorRepository.BuscarPorId(AutorId);
-            if (autorExistente == null)
-                return NotFound("Autor não encontrado.");
+            try
+            {
+                if (livro == null)
+                    return BadRequest("Dados do livro não fornecidos.");
+                    
+                if (string.IsNullOrEmpty(livro.Nome))
+                    return BadRequest("Nome do livro é obrigatório.");
+                    
+                if (livro.AutorId <= 0)
+                    return BadRequest("AutorId é obrigatório.");
 
-            livro.autor = autorExistente;
-        
+                var autorExistente = _autorRepository.BuscarPorId(livro.AutorId);
+                if (autorExistente == null)
+                    return NotFound("Autor não encontrado.");
 
-            _livrosRepository.Cadastrar(livro);
-            return Created("",livro);
+                livro.Autor = autorExistente;
+                livro.Emprestado = false; // Novo livro sempre começa como não emprestado
 
+                _livrosRepository.Cadastrar(livro);
+                return Created("", livro);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao cadastrar livro: {ex.Message}");
+            }
         }
 
         
         [HttpDelete("deletar/{id}")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "administrador")]
         public IActionResult Deletar(int id)
         {
             var livro = _livrosRepository.BuscarPorId(id);

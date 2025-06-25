@@ -20,22 +20,39 @@ public class EmprestimoRepository : IEmprestimoRepository
 
     public List<Emprestimo> Listar()
     {
-        return _context.Emprestimos.ToList();
+        return _context.Emprestimos
+            .Include(e => e.livro)
+                .ThenInclude(l => l.Autor)
+            .Include(e => e.usuario)
+            .ToList();
     }
 
     public List<Emprestimo> ListarPorUsuario(int usuarioId)
     {
-        return _context.Emprestimos.Where(e => e.usuarioId == usuarioId).ToList();
+        return _context.Emprestimos
+            .Include(e => e.livro)
+                .ThenInclude(l => l.Autor)
+            .Include(e => e.usuario)
+            .Where(e => e.usuarioId == usuarioId)
+            .ToList();
     }
 
-    public Emprestimo BuscarPorId(int id)
+    public Emprestimo? BuscarPorId(int id)
     {
-        return _context.Emprestimos.FirstOrDefault(e => e.Id == id);
+        return _context.Emprestimos
+            .Include(e => e.livro)
+                .ThenInclude(l => l.Autor)
+            .Include(e => e.usuario)
+            .FirstOrDefault(e => e.Id == id);
     }
 
-    public Emprestimo BuscarPorLivroId(int livroId)
+    public Emprestimo? BuscarPorLivroId(int livroId)
     {
-        return _context.Emprestimos.FirstOrDefault(e => e.livroId == livroId && e.dataDeExpircao == null);
+        return _context.Emprestimos
+            .Include(e => e.livro)
+                .ThenInclude(l => l.Autor)
+            .Include(e => e.usuario)
+            .FirstOrDefault(e => e.livroId == livroId && e.ConcluidoEm == null);
     }
 
     public void Finalizar(Emprestimo emprestimo)

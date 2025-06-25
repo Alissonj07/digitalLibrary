@@ -7,7 +7,7 @@ public class Livros
     public int Id { get; set; }
     public required string Nome { get; set; }
     public int AutorId { get; set; }
-    public required Autor autor { get; set; }
-    public bool emprestado { get; set; }
+    public Autor? Autor { get; set; }
+    public bool Emprestado { get; set; }
     public DateTime CriadoEm { get; set; } = DateTime.Now;
 }
